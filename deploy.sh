@@ -35,6 +35,7 @@ if [[ -d "$nvim_config_dir" && "$(ls -A $nvim_config_dir)" ]]; then
         rm -rf "$nvim_config_dir"
         # Copy new nvim configuration
         cp -r "$script_dir/nvim" "$nvim_config_dir"
+        cp "$script_dir/.tmux.conf" $HOME
         echo "Configuration deployed successfully."
     else
         echo "Operation canceled by user."
