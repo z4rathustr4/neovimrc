@@ -13,7 +13,7 @@ return {
   require('z4rathustr4.plugins.nvim-dap'),
   require('z4rathustr4.plugins.nvim-dap-ui'),
   require('z4rathustr4.plugins.hover'),
-  require('z4rathustr4.plugins.codeium'),
+  -- require('z4rathustr4.plugins.codeium'),
   require('z4rathustr4.plugins.catppuccin'),
   require('z4rathustr4.plugins.telescope'),
   require('z4rathustr4.plugins.debug'),

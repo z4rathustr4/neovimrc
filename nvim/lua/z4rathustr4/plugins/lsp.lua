@@ -28,7 +28,7 @@ return {
             ensure_installed = {
                 "lua_ls",
                 "rust_analyzer",
-                "tsserver",
+		"pylsp",
             },
             handlers = {
                 function(server_name) -- default handler (optional)
@@ -48,6 +48,32 @@ return {
                                     globals = { "vim", "it", "describe", "before_each", "after_each" },
                                 }
                             }
+                        }
+                    }
+                end,
+                ["pylsp"] = function()
+                    local lspconfig = require("lspconfig")
+                    lspconfig.pylsp.setup {
+                        capabilities = capabilities,
+				settings = {
+				pylsp = {
+					plugins = {
+						-- formatter options
+						black = { enabled = true },
+						autopep8 = { enabled = false },
+						yapf = { enabled = false },
+						-- linter options
+						pylint = { enabled = false, executable = "pylint" },
+						pyflakes = { enabled = false },
+						pycodestyle = { enabled = false },
+						-- type checker
+						pylsp_mypy = { enabled = true },
+						-- auto-completion options
+						jedi_completion = { fuzzy = true },
+						-- import sorting
+						pyls_isort = { enabled = true },
+					},
+				},
                         }
                     }
                 end,
