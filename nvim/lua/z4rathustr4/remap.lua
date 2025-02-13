@@ -48,9 +48,21 @@ vim.keymap.set("n", "<leader>x", "<cmd>!chmod +x %<CR>", { silent = true })
 -- vim.keymap.set("n", "<leader>vpp", "<cmd>e ~/.dotfiles/nvim/.config/nvim/lua/theprimeagen/packer.lua<CR>");
 vim.keymap.set("n", "<leader>mr", "<cmd>CellularAutomaton make_it_rain<CR>");
 
-vim.keymap.set(
-    "n",
-    "<leader>ee",
-    "oif err != nil {<CR>}<Esc>Oreturn err<Esc>"
-)
+-- :clist
+vim.keymap.set("n", "<leader>ee", "<cmd>clist<CR>")
+
+vim.keymap.set("n", "<leader>g", function()
+    local word = vim.fn.expand("<cword>")  -- i
+    if word == '' then return end          -- am
+
+    -- a FUCKING
+    local escaped = vim.fn.escape(word, '\\')
+    local pattern = string.format('\\<%s\\>', escaped)
+
+    -- genius
+    vim.cmd("silent! lvimgrepadd /" .. pattern .. "/j %")
+end)
+
+-- :lopen
+vim.keymap.set("n", "<leader>l", "<cmd>lopen<CR>")
 
