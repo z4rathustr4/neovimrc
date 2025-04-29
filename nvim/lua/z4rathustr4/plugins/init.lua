@@ -18,5 +18,6 @@ return {
   require('z4rathustr4.plugins.telescope'),
   require('z4rathustr4.plugins.debug'),
   require('z4rathustr4.plugins.dashboard'),
+  require('z4rathustr4.plugins.harpoon'),
 }
 
