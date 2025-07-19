@@ -1,0 +1,69 @@
+#!/bin/bash
+
+set -euo pipefail
+
+TYPE=""
+FORMAT="exe" # default for WinPEAS
+
+usage() {
+    echo "Usage: $0 -l (LinPEAS) | -w (WinPEAS)"
+    exit 1
+}
+
+while getopts ":lw" opt; do
+    case ${opt} in
+        l ) TYPE="linpeas" ;;
+        w ) TYPE="winpeas" ;;
+        \? ) usage ;;
+    esac
+done
+
+if [[ -z "$TYPE" ]]; then
+    usage
+fi
+
+BASE_API="https://api.github.com/repos/peass-ng/PEASS-ng/releases/latest"
+
+echo "[*] Fetching latest release info..."
+RELEASE_DATA=$(curl -s "$BASE_API")
+
+# Parse all available assets
+echo "[*] Available assets:"
+ASSETS=($(echo "$RELEASE_DATA" | grep -oP '"browser_download_url": "\K[^"]+'))
+
+# Filter based on type
+FILTERED=()
+for asset in "${ASSETS[@]}"; do
+    if [[ "$TYPE" == "linpeas" && "$asset" == *"linpeas.sh" ]]; then
+        FILTERED+=("$asset")
+    elif [[ "$TYPE" == "winpeas" && "$asset" == *"winPEAS"* ]]; then
+        FILTERED+=("$asset")
+    fi
+done
+
+if [[ "${#FILTERED[@]}" -eq 0 ]]; then
+    echo "[!] No matching assets found."
+    exit 1
+fi
+
+# Present menu
+for i in "${!FILTERED[@]}"; do
+    printf "%3d) %s\n" $((i+1)) "$(basename "${FILTERED[$i]}")"
+done
+
+echo ""
+read -p "Select a file to download (number): " choice
+
+if ! [[ "$choice" =~ ^[0-9]+$ ]] || (( choice < 1 || choice > ${#FILTERED[@]} )); then
+    echo "[!] Invalid selection."
+    exit 1
+fi
+
+SELECTED_URL="${FILTERED[$((choice-1))]}"
+FILE_NAME=$(basename "$SELECTED_URL")
+
+echo "[*] Downloading $FILE_NAME ..."
+curl -L --fail --retry 3 "$SELECTED_URL" -o "$FILE_NAME"
+echo "[+] Successfully downloaded: $FILE_NAME"
+
+

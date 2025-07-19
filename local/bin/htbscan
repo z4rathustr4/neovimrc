@@ -1,0 +1,201 @@
+#!/bin/bash
+
+# Usage: ./htbscan.sh -i <IP> -n <machine-name>
+
+# Settings
+THREADS=50
+DIR_WORDLIST="/usr/share/seclists/Discovery/Web-Content/directory-list-2.3-medium.txt"
+VHOST_WORDLIST="/usr/share/seclists/Discovery/DNS/bitquark-subdomains-top100000.txt"
+EXTENSIONS="php,html,txt,js,conf,config,bak"
+
+# Parse command line arguments
+while getopts "i:n:" opt; do
+  case ${opt} in
+    i ) TARGET_IP=$OPTARG ;;
+    n ) MACHINE_NAME=$OPTARG ;;
+    \? ) echo "Usage: $0 -i <IP> -n <machine-name>" && exit 1 ;;
+  esac
+done
+
+# Check if required arguments are provided
+if [[ -z "$TARGET_IP" || -z "$MACHINE_NAME" ]]; then
+  echo "Missing parameters."
+  echo "Usage: $0 -i <IP> -n <machine-name>"
+  exit 1
+fi
+
+echo "[+] Starting recon on $TARGET_IP ($MACHINE_NAME)"
+
+# Create directory for results
+mkdir -p "$MACHINE_NAME"
+cd "$MACHINE_NAME" || exit
+
+# 1. Basic Nmap Scan - Show output in real-time and wait for completion
+echo "[*] Running initial Nmap scan..."
+echo "sudo nmap -sCV -T4 $TARGET_IP -oA nmap-initial"
+sudo nmap -sCV -T4 "$TARGET_IP" -oA nmap-initial
+
+# 1.1 Generate HTML report for initial scan
+echo "[*] Converting initial Nmap scan to HTML..."
+xsltproc nmap-initial.xml -o nmap-initial.html
+
+# 2. Extract domains from redirects in nmap output
+DOMAINS=()
+REDIRECT_DOMAINS=$(grep -oP "(?<=to http[s]?://)[^/]+" nmap-initial.nmap | sort -u)
+
+if [ -n "$REDIRECT_DOMAINS" ]; then
+  for domain in $REDIRECT_DOMAINS; do
+    DOMAINS+=("$domain")
+    echo "[+] Found domain from redirect: $domain"
+  done
+else
+  # If no redirect domains found, use the machine name as fallback
+  DOMAINS+=("$MACHINE_NAME.htb")
+  echo "[*] Using default domain: $MACHINE_NAME.htb"
+fi
+
+# 3. Extract domain controller information
+# Look for Active Directory domains
+AD_DOMAIN=$(grep -oP "Domain: \K[^,]+" nmap-initial.nmap | sort -u | sed 's/0\.$//')
+if [ -n "$AD_DOMAIN" ]; then
+  echo "[+] Found Active Directory domain: $AD_DOMAIN"
+  # Add the main domain to our list if not already present
+  if [[ ! " ${DOMAINS[@]} " =~ " ${AD_DOMAIN} " ]]; then
+    DOMAINS+=("$AD_DOMAIN")
+  fi
+fi
+
+# Look for domain controllers
+DC_NAMES=$(grep -oP "commonName=\K[^,]+" nmap-initial.nmap | grep -i "\..*\." | sort -u)
+if [ -n "$DC_NAMES" ]; then
+  for dc in $DC_NAMES; do
+    echo "[+] Found domain controller: $dc"
+    # Add DC to our domains list if not already present
+    if [[ ! " ${DOMAINS[@]} " =~ " ${dc} " ]]; then
+      DOMAINS+=("$dc")
+    fi
+  done
+fi
+
+# Also check SAN entries for additional hostnames
+SAN_NAMES=$(grep -oP "DNS:\K[^,]+" nmap-initial.nmap | sort -u)
+if [ -n "$SAN_NAMES" ]; then
+  for name in $SAN_NAMES; do
+    echo "[+] Found hostname in certificate SAN: $name"
+    # Add to our domains list if not already present
+    if [[ ! " ${DOMAINS[@]} " =~ " ${name} " ]]; then
+      DOMAINS+=("$name")
+    fi
+  done
+fi
+
+# 4. Add all domains to /etc/hosts (quietly)
+for domain in "${DOMAINS[@]}"; do
+  if ! grep -q "$domain" /etc/hosts; then
+    echo "[+] Adding to /etc/hosts: $TARGET_IP $domain"
+    echo "$TARGET_IP $domain" | sudo tee -a /etc/hosts > /dev/null
+  fi
+done
+
+# 5. Full Port Scan in Background - Suppress output and set up HTML conversion
+echo "[*] Starting full port scan in background..."
+{
+  sudo nmap -sCV -T4 -p- "$TARGET_IP" -oA nmap-full > /dev/null 2>&1
+  echo "[*] Full port scan completed - converting to HTML"
+  xsltproc nmap-full.xml -o nmap-full.html
+} &
+
+# 6. Check for web services
+WEB_PORTS=$(grep -oP '\d+/tcp\s+open\s+(?:http|ssl)' nmap-initial.nmap | cut -d'/' -f1)
+
+if [ -z "$WEB_PORTS" ]; then
+  echo "[*] No web services detected in initial scan."
+else
+  echo "[+] Web services detected on ports: $WEB_PORTS"
+
+  # Create web directory
+  mkdir -p web
+
+  # 7. Web enumeration for each port
+  for port in $WEB_PORTS; do
+    echo "[*] Checking web service on port $port..."
+
+    # Web directories for this port
+    mkdir -p "web/port_$port"
+
+    # Enumerate each detected domain
+    for domain in "${DOMAINS[@]}"; do
+      # Test both HTTP and HTTPS
+      if [ "$port" -eq 443 ] || [ "$port" -eq 8443 ]; then
+        protocol="https"
+      else
+        protocol="http"
+      fi
+
+      # Verify the domain is accessible - suppress curl output
+      HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" -m 5 "$protocol://$domain:$port")
+
+      if [[ "$HTTP_STATUS" == "000" ]]; then
+        echo "[!] Cannot connect to $protocol://$domain:$port - skipping"
+        continue
+      fi
+
+      echo "[+] Connection successful: $protocol://$domain:$port (HTTP $HTTP_STATUS)"
+
+      # Create directory for this domain
+      mkdir -p "web/port_$port/$domain"
+
+      # Get initial page content and headers - quietly
+      curl -sk -o "web/port_$port/$domain/index.html" "$protocol://$domain:$port" 2>/dev/null
+      curl -sk -o /dev/null -D "web/port_$port/$domain/headers.txt" "$protocol://$domain:$port" 2>/dev/null
+
+      # Check for further redirects in the response headers
+      FURTHER_REDIRECT=$(grep -oP "(?<=Location: http[s]?://)[^/]+" "web/port_$port/$domain/headers.txt" 2>/dev/null | sort -u)
+
+      if [ -n "$FURTHER_REDIRECT" ]; then
+        echo "[+] Found additional redirect to: $FURTHER_REDIRECT"
+        if ! grep -q "$FURTHER_REDIRECT" /etc/hosts; then
+          echo "[+] Adding to /etc/hosts: $TARGET_IP $FURTHER_REDIRECT"
+          echo "$TARGET_IP $FURTHER_REDIRECT" | sudo tee -a /etc/hosts > /dev/null
+          DOMAINS+=("$FURTHER_REDIRECT")
+        fi
+      fi
+
+      # Run directory brute force with feroxbuster (quietly)
+      echo "[*] Running feroxbuster on $protocol://$domain:$port"
+      feroxbuster --url "$protocol://$domain:$port" \
+        --wordlist "$DIR_WORDLIST" \
+        --depth 2 \
+        --threads "$THREADS" \
+        --output "web/port_$port/$domain/ferox_dirs.txt" \
+        --quiet > /dev/null 2>&1 &
+
+      # Run dirsearch
+      echo "[*] Running dirsearch on $protocol://$domain:$port"
+      dirsearch -u "$protocol://$domain:$port" \
+        -e "$EXTENSIONS" \
+        -t "$THREADS" \
+        -o "web/port_$port/$domain/dirsearch_results.txt" \
+        --quiet > /dev/null 2>&1 &
+
+      echo "[*] Running subdomain enumeration with ffuf on $domain:$port"
+      ffuf -w "$VHOST_WORDLIST" \
+        -u "$protocol://$domain:$port" \
+        -H "Host: FUZZ.$domain" \
+        -fs 178 \
+        -o "web/port_$port/$domain/ffuf_subdomains.txt" \
+        -q > /dev/null 2>&1 &
+    done
+  done
+fi
+
+# Display the initial Nmap scan results
+echo ""
+echo "========== SCAN SUMMARY =========="
+echo "[+] All scans launched for $MACHINE_NAME ($TARGET_IP)"
+echo "[+] Domains added to /etc/hosts: ${DOMAINS[*]}"
+echo "[+] Scan results will be saved in the '$MACHINE_NAME' directory"
+echo "[+] HTML report for initial Nmap scan available at: $(pwd)/nmap-initial.html"
+echo "[+] Full port scan with HTML output will be generated in background"
+echo "[!] Some scans are running in the background. Check the output directory for results."
+echo "=================================="
