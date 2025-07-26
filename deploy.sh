@@ -94,3 +94,8 @@ if [[ -d $utilities_dir ]]; then
 		cp -r "$script_dir/local/bin/"* "$utilities_dir"
 		echo "[+] Scripts deployed"
 fi
+
+# install tpm
+echo "[+] Installing tmux plugin manager"
+git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
+
