@@ -279,8 +279,9 @@ alias l='ls -F'
 # ------------ #
 
 alias vim='nvim'
-alias rcp='rsync -a --progress --stats'
-alias htbon='sudo openvpn /home/pwn/ovpnconfig/lab.ovpn 2>/dev/null'
+alias rcp='rsync -a --progress --stats '
+alias htbon='sudo openvpn /home/pwn/ovpnconfig/lab_n3uroh4lt.ovpn 2>/dev/null'
+alias fd='fdfind'
 
 # enable auto-suggestions based on the history
 if [ -f /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh ]; then
@@ -302,24 +303,24 @@ command_not_found_handler() {
 
 function fzf-lovely(){
 
-if [ "$1" = "h" ]; then
-  fzf -m --reverse --preview-window down:20 --preview '[[ $(file --mime {}) =~ binary ]] &&
-    echo {} is a binary file ||
-    (bat --style=numbers --color=always {} ||
-    highlight -O ansi -l {} ||
-    coderay {} ||
-    rougify {} ||
-    cat {}) 2> /dev/null | head -500'
+  if [ "$1" = "h" ]; then
+    fzf -m --reverse --preview-window down:20 --preview '[[ $(file --mime {}) =~ binary ]] &&
+      echo {} is a binary file ||
+      (bat --style=numbers --color=always {} ||
+      highlight -O ansi -l {} ||
+      coderay {} ||
+      rougify {} ||
+      cat {}) 2> /dev/null | head -500'
 
-else
-  fzf -m --preview '[[ $(file --mime {}) =~ binary ]] &&
-    echo {} is a binary file ||
-    (bat --style=numbers --color=always {} ||
-    highlight -O ansi -l {} ||
-    coderay {} ||
-    rougify {} ||
-    cat {}) 2> /dev/null | head -500'
-fi
+  else
+    fzf -m --preview '[[ $(file --mime {}) =~ binary ]] &&
+      echo {} is a binary file ||
+      (bat --style=numbers --color=always {} ||
+      highlight -O ansi -l {} ||
+      coderay {} ||
+      rougify {} ||
+      cat {}) 2> /dev/null | head -500'
+  fi
 }
 
 
@@ -370,11 +371,13 @@ if command -v eza >/dev/null 2>&1; then
   alias ls='eza -l --group-directories-first --color=auto'
 fi
 
+if command -v batcat >/dev/null 2>&1; then
+  alias cat='batcat --color=always'
+fi
 
 source /usr/share/doc/fzf/examples/key-bindings.zsh
 source /usr/share/doc/fzf/examples/completion.zsh
 export PATH="$PATH:/opt/nvim-linux-x86_64/bin"
-
 
 # Golang
 export GOPATH=$HOME/go
@@ -387,14 +390,16 @@ export HTB_TOKEN=[REDACTED]
 source /home/pwn/.oh-my-zsh/custom/plugins/htb-cli/htb-cli-completion.zsh
 source /home/pwn/.oh-my-zsh/custom/plugins/gobuster/gobuster.zsh
 
-# brew
 eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-# the fuuuuck
 eval $(thefuck --alias)
-# zoxide (hope it doesn't make me lazy)
 eval "$(zoxide init zsh)"
 
 . "$HOME/.cargo/env"
+export PATH=/usr/lib/cargo/bin/coreutils:$PATH
+
+
 fpath=(~/.zsh.d/ $fpath)
 
-
+export PYENV_ROOT="$HOME/.pyenv"
+[[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"
+eval "$(pyenv init - zsh)"
