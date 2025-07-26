@@ -6,11 +6,35 @@ backup_dir="$HOME/.config/nvim.bak"
 script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 font_get_cmd_url="https://github.com/epk/SF-Mono-Nerd-Font/archive/refs/tags/v18.0d1e1.0.tar.gz"
 utilities_dir="$HOME/.local/bin"
+fonts_dir="$HOME/.local/share/fonts"
+archive_name="v18.0d1e1.0.tar.gz"
+extract_dir="v18.0d1e1.0"
 
 # Get SF-Mono-Nerd-Font from github.
 get_fonts() {
-	wget "$font_get_cmd_url"
-	echo "[+] SF-Mono-Nerd-Font fetched."
+    wget "$font_get_cmd_url" -O "$archive_name" || {
+        echo "[-] Failed to download font."
+        return 1
+    }
+
+    echo "[+] Font archive fetched."
+
+    mkdir -p "$fonts_dir"
+    tar xvf "$archive_name" || {
+        echo "[-] Failed to extract archive."
+        return 1
+    }
+
+    cp -r "$extract_dir"/* "$fonts_dir" || {
+        echo "[-] Failed to copy fonts."
+        return 1
+    }
+
+    fc-cache -fv "$fonts_dir"
+    echo "[+] Fonts installed and cache updated."
+
+    # clean the downloaded archive & extracted directory
+    rm -rf "$archive_name" "$extract_dir"
 }
 
 get_fonts
