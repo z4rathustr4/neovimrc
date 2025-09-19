@@ -1,1 +1,1 @@
-return {'rafi/awesome-vim-colorschemes'}
+return { 'rafi/awesome-vim-colorschemes' }
