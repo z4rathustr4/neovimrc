@@ -6,6 +6,7 @@ backup_dir="$HOME/.config/nvim.bak"
 script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 font_get_cmd_url="https://github.com/epk/SF-Mono-Nerd-Font/archive/refs/tags/v18.0d1e1.0.tar.gz"
 utilities_dir="$HOME/.local/bin"
+ghostty_config_dir="$HOME/.config/ghostty"
 fonts_dir="$HOME/.local/share/fonts"
 archive_name="v18.0d1e1.0.tar.gz"
 extract_dir="v18.0d1e1.0"
@@ -94,6 +95,17 @@ if [[ -d $utilities_dir ]]; then
 		cp -r "$script_dir/local/bin/"* "$utilities_dir"
 		echo "[+] Scripts deployed"
 fi
+
+# ghostty config
+if [[ -d $ghostty_config_dir ]]; then
+	echo "[+] Deploying ghostty config"
+	cp -rf "$script_dir/config.ghostty" "$ghostty_config_dir" || {
+		echo "[!] Failed to deploy ghostty config, did you install Ghostty? -.-"
+		exit 1
+	}
+	echo "[+] Ghostty config deployed"
+fi
+
 
 # install tpm
 echo "[+] Installing tmux plugin manager"
