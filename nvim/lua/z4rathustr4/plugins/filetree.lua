@@ -1,20 +1,16 @@
--- Unless you are still migrating, remove the deprecated commands from v1.x
-local map = vim.api.nvim_set_keymap
-local opts = { noremap = true, silent = true }
-
-vim.cmd([[ let g:neo_tree_remove_legacy_commands = 1 ]])
-
 return {
-	"nvim-neo-tree/neo-tree.nvim",
-	version = "*",
-	dependencies = {
-		"nvim-lua/plenary.nvim",
-		"nvim-tree/nvim-web-devicons", -- not strictly required, but recommended
-		"MunifTanjim/nui.nvim",
+	spec = {
+		{ src = "https://github.com/nvim-neo-tree/neo-tree.nvim" },
+		{ src = "https://github.com/nvim-lua/plenary.nvim" },
+		{ src = "https://github.com/nvim-tree/nvim-web-devicons" }, -- not strictly required, but recommended
+		{ src = "https://github.com/MunifTanjim/nui.nvim" },
 	},
+
 	config = function()
-		require('neo-tree').setup {
-			map("n", "<C-n>", "<cmd>Neotree toggle<CR>", opts)
-		}
+		vim.g.neo_tree_remove_legacy_commands = 1
+
+		require("neo-tree").setup({})
+
+		vim.keymap.set("n", "<C-n>", "<cmd>Neotree toggle<CR>", { noremap = true, silent = true })
 	end,
 }

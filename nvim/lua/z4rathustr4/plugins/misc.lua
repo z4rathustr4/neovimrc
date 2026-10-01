@@ -1,9 +1,15 @@
 return {
-	-- Add indentation guides even on blank lines
-	{ 'lukas-reineke/indent-blankline.nvim', main = 'ibl' },
+	spec = {
+		{ src = "https://github.com/lukas-reineke/indent-blankline.nvim" },
+		{ src = "https://github.com/numToStr/Comment.nvim" },
+	},
 
-	-- Enable `lukas-reineke/indent-blankline.nvim`
-	-- See `:help indent_blankline.txt`
-	-- "gc" to comment visual regions/lines
-	{ 'numToStr/Comment.nvim',               opts = {} },
+	config = function()
+		require("ibl").setup({
+			exclude = {
+				filetypes = { "dashboard" },
+			},
+		})
+		require("Comment").setup()
+	end,
 }

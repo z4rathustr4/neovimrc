@@ -1,17 +1,18 @@
 return {
-	"L3MON4D3/LuaSnip",
-	lazy = true,
-	dependencies = {
-		{
-			"rafamadriz/friendly-snippets",
-			config = function()
-				require("luasnip.loaders.from_vscode").lazy_load()
-				require("luasnip.loaders.from_vscode").lazy_load({ paths = { vim.fn.stdpath("config") .. "/snippets" } })
-			end,
-		},
+	spec = {
+		{ src = "https://github.com/L3MON4D3/LuaSnip" },
+		{ src = "https://github.com/rafamadriz/friendly-snippets" },
 	},
-	opts = {
-		history = true,
-		delete_check_events = "TextChanged",
-	},
+
+	config = function()
+		require("luasnip").setup({
+			history = true,
+			delete_check_events = "TextChanged",
+		})
+
+		require("luasnip.loaders.from_vscode").lazy_load()
+		require("luasnip.loaders.from_vscode").lazy_load({
+			paths = { vim.fn.stdpath("config") .. "/snippets" },
+		})
+	end,
 }

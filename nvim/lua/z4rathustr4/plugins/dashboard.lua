@@ -1,12 +1,16 @@
 return {
-	'nvimdev/dashboard-nvim',
-	event = 'VimEnter',
+	spec = {
+		{ src = "https://github.com/nvimdev/dashboard-nvim" },
+		{ src = "https://github.com/nvim-tree/nvim-web-devicons" },
+	},
+
 	config = function()
-		require('dashboard').setup {
-			theme = 'doom',
+		require("dashboard").setup({
+			theme = "doom",
 			config = {
 
-				header = { "",
+				header = {
+					"",
 					"              ...                             ",
 					"             ;::::;                           ",
 					"           ;::::; :;                          ",
@@ -33,7 +37,7 @@ return {
 				},
 				center = {
 					{
-						icon = "  ",
+						icon = "  ",
 						desc = "Recent Files",
 						key = "r",
 						keymap = "SPC f r",
@@ -41,7 +45,7 @@ return {
 					},
 
 					{
-						icon = "  ",
+						icon = "  ",
 						desc = "Find Files",
 						key = "f",
 						keymap = "SPC f f",
@@ -49,7 +53,7 @@ return {
 					},
 
 					{
-						icon = "  ",
+						icon = "  ",
 						desc = "Edit config",
 						key = ".",
 						keymap = "",
@@ -58,7 +62,6 @@ return {
 				},
 				footer = { "z4rathustr4's neovim config" },
 			},
-		}
+		})
 	end,
-	dependencies = { { 'nvim-tree/nvim-web-devicons' } }
 }
