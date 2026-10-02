@@ -1,0 +1,3 @@
+[submodule "st"]
+	path = st
+	url = https://github.com/z4rathustr4/st.git
