@@ -40,8 +40,23 @@ vim.keymap.set("n", "<C-k>", "<cmd>cnext<CR>zz")
 vim.keymap.set("n", "<C-j>", "<cmd>cprev<CR>zz")
 vim.keymap.set("n", "<leader>k", "<cmd>lnext<CR>zz")
 vim.keymap.set("n", "<leader>j", "<cmd>lprev<CR>zz")
+-- old bullcrap
+-- vim.keymap.set("n", "<leader>s", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]])
+-- new rename bullcrap:
 
-vim.keymap.set("n", "<leader>s", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]])
+vim.keymap.set("n", "<leader>s", function()
+	local word = vim.fn.expand("<cword>")
+	if word == "" then return end
+
+	vim.ui.input({ prompt = "Rename " .. word .. ": ", default = word }, function(new)
+		if not new or new == "" or new == word then return end
+
+		local pat = vim.fn.escape(word, [[/\.*$^~[]])
+		local rep = vim.fn.escape(new, [[/\&~]])
+		vim.cmd(("%%s/\\<%s\\>/%s/gI"):format(pat, rep))
+	end)
+end, { desc = "Rename word under cursor in buffer" })
+
 vim.keymap.set("n", "<leader>x", "<cmd>!chmod +x %<CR>", { silent = true })
 
 vim.keymap.set("n", "]f", function()

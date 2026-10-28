@@ -16,7 +16,7 @@ setopt promptsubst         # enable command substitution in prompt
 # wget "https://github.com/sharkdp/vivid/releases/download/v0.8.0/vivid_0.8.0_amd64.deb"
 # sudo dpkg -i vivid_0.8.0_amd64.deb
 # DISABLE DIRCOLORS LOGIC BELOW!!!!!
-export LS_COLORS="$(vivid generate snazzy)"
+# export LS_COLORS="$(vivid generate snazzy)"
 
 WORDCHARS=${WORDCHARS//\/} # Don't consider certain characters part of the word
 
@@ -48,7 +48,7 @@ done
 compinit -C -d ~/.config/zsh/zcompdump
 
 # plugins
-plugins=(fzf-zsh-plugin exercism virtualenv)
+plugins=(fzf virtualenv zsh-syntax-highlighting zsh-autosuggestions zsh-interactive-cd fzf)
 
 autoload -Uz add-zsh-hook
 autoload -Uz vcs_info
@@ -278,10 +278,13 @@ alias l='ls -F'
 # START CUSTOM #
 # ------------ #
 
-alias vim='nvim'
+alias vim='/opt/nvim/nvim'
+alias e='/opt/nvim/nvim'
 alias rcp='rsync -a --progress --stats '
-alias htbon='sudo openvpn /home/pwn/ovpnconfig/lab_n3uroh4lt.ovpn 2>/dev/null'
 alias fd='fdfind'
+alias gits='git status'
+alias commit='git commit -a'
+
 
 # enable auto-suggestions based on the history
 if [ -f /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh ]; then
@@ -371,35 +374,26 @@ if command -v eza >/dev/null 2>&1; then
   alias ls='eza -l --group-directories-first --color=auto'
 fi
 
+# same with batcat
 if command -v batcat >/dev/null 2>&1; then
   alias cat='batcat --color=always'
 fi
 
-source /usr/share/doc/fzf/examples/key-bindings.zsh
-source /usr/share/doc/fzf/examples/completion.zsh
+source /usr/share/fzf/key-bindings.zsh
+source /usr/share/fzf/completion.zsh
 export PATH="$PATH:/opt/nvim-linux-x86_64/bin"
+export EDITOR=/opt/nvim/nvim
 
 # Golang
 export GOPATH=$HOME/go
 export PATH=$PATH:$GOROOT/bin:$GOPATH/bin
 
-export HTB_TOKEN=[REDACTED]
-
-#--------------------------------- htb-cli STUFF ------------------------------
-
-source /home/pwn/.oh-my-zsh/custom/plugins/htb-cli/htb-cli-completion.zsh
-source /home/pwn/.oh-my-zsh/custom/plugins/gobuster/gobuster.zsh
-
-eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-eval $(thefuck --alias)
-eval "$(zoxide init zsh)"
-
-. "$HOME/.cargo/env"
 export PATH=/usr/lib/cargo/bin/coreutils:$PATH
 
+if [ -d "/opt/platform-tools" ] ; then
+	export PATH="/opt/platform-tools:$PATH"
+fi
 
 fpath=(~/.zsh.d/ $fpath)
 
-export PYENV_ROOT="$HOME/.pyenv"
-[[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"
-eval "$(pyenv init - zsh)"
+export SSH_AUTH_SOCK=$(gpgconf --list-dirs agent-ssh-socket)
