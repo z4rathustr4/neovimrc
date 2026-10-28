@@ -1,0 +1,8 @@
+nvim#symlink#.config
+.zshrc#symlink#
+local#symlink#.local
+.tmux.conf#symlink#
+settings.ini#symlink#.config/gtk-3.0
+config.ghostty#symlink#.config/ghostty
+.clangd#symlink#
+st#makeinstall
