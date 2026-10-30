@@ -9,11 +9,11 @@ CompileFlags:
     - -Wfloat-equal
     - -Wno-unused-const-variable
     - -Wno-sign-conversion
-    - -std=c++17
-    - -I/usr/include/c++/14
-    - -I/usr/include/x86_64-linux-gnu/c++/14
-    - -I/usr/include/c++/14/backward
-    - -I/usr/lib/gcc/x86_64-linux-gnu/14/include
+    - -std=c17
+    - -I/usr/include/c++/16
+    - -I/usr/include/x86_64-linux-gnu/c++/16
+    - -I/usr/include/c++/16/backward
+    - -I/usr/lib/gcc/x86_64-linux-gnu/16/include
     - -I/usr/local/include
     - -I/usr/include/x86_64-linux-gnu
     - -I/usr/include
