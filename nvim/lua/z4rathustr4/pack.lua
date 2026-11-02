@@ -16,6 +16,7 @@ local modules = {
 	require("z4rathustr4.plugins.misc"),
 	require("z4rathustr4.plugins.compilation-mode"),
 	require("z4rathustr4.plugins.bufferin"),
+	require("z4rathustr4.plugins.lualine"),
 }
 
 -- single confirmation prompt on plugin install
