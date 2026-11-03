@@ -388,6 +388,10 @@ export EDITOR=/opt/nvim/nvim
 export GOPATH=$HOME/go
 export PATH=$PATH:$GOROOT/bin:$GOPATH/bin
 
+# Rust
+. "$HOME/.cargo/env"
+
+
 export PATH=/usr/lib/cargo/bin/coreutils:$PATH
 
 if [ -d "/opt/platform-tools" ] ; then
@@ -397,3 +401,6 @@ fi
 fpath=(~/.zsh.d/ $fpath)
 
 export SSH_AUTH_SOCK=$(gpgconf --list-dirs agent-ssh-socket)
+
+# opencode
+export PATH=/home/n3uroh4lt/.opencode/bin:$PATH

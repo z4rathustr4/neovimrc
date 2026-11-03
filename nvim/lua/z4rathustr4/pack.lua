@@ -17,6 +17,7 @@ local modules = {
 	require("z4rathustr4.plugins.compilation-mode"),
 	require("z4rathustr4.plugins.bufferin"),
 	require("z4rathustr4.plugins.lualine"),
+	require("z4rathustr4.plugins.neogit"),
 }
 
 -- single confirmation prompt on plugin install
@@ -35,3 +36,8 @@ for _, mod in ipairs(modules) do
 		mod.config()
 	end
 end
+
+-- add custom luasnip snippets
+require("luasnip.loaders.from_lua").load({
+	paths = { vim.fn.stdpath("config") .. "/lua/z4rathustr4/mysnippets" },
+})

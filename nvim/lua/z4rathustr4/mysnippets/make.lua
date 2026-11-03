@@ -10,7 +10,7 @@ end
 local body = [=[
 CC      := cc
 CFLAGS  := -std=c17 -Wall -Wextra -Werror -Wno-unused-parameter -Wno-unused-function -Iinclude
-TARGET  := PROJECT_NAME
+TARGET  := @@TARGET@@
 
 SRC_DIR := src
 OBJ_DIR := obj
@@ -29,45 +29,45 @@ $(foreach i,$(shell seq 1 $(TOTAL)),$(eval IDX_$(word $(i),$(OBJS)) := $(i)))
 .DEFAULT_GOAL := all
 
 all: build
-	@echo "[all] Nothing left to do: '$(TARGET)' is built from $(TOTAL) object(s):"
-	@for o in $(OBJS); do echo "[all]   - $$o"; done
-	@echo "[all] Run ./$(TARGET) to use it."
+<T>@echo "[all] Nothing left to do: '$(TARGET)' is built from $(TOTAL) object(s):"
+<T>@for o in $(OBJS); do echo "[all]   - $$o"; done
+<T>@echo "[all] Run ./$(TARGET) to use it."
 
 build: $(TARGET)
-	@echo "[build] Finished: $(TOTAL) object(s) linked into '$(TARGET)':"
-	@for o in $(OBJS); do echo "[build]   - $$o"; done
-	@echo "[build] Progress: $(STEPS)/$(STEPS) steps (100%)"
+<T>@echo "[build] Finished: $(TOTAL) object(s) linked into '$(TARGET)':"
+<T>@for o in $(OBJS); do echo "[build]   - $$o"; done
+<T>@echo "[build] Progress: $(STEPS)/$(STEPS) steps (100%)"
 
 $(TARGET): $(OBJS)
-	@echo "[100%] Linking $(TARGET) ($(STEPS)/$(STEPS))"
-	@echo "       Objects: $(OBJS)"
-	@$(CC) $(OBJS) -o $@
+<T>@echo "[100%] Linking $(TARGET) ($(STEPS)/$(STEPS))"
+<T>@echo "       Objects: $(OBJS)"
+<T>@$(CC) $(OBJS) -o $@
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c | $(OBJ_DIR)
-	@printf "[%3d%%] Compiling %s (%s/%s)\n" $$((100 * $(IDX_$@) / $(STEPS))) $< $(IDX_$@) $(STEPS)
-	@$(CC) $(CFLAGS) -MMD -MP -c $< -o $@
+<T>@printf "[%3d%%] Compiling %s (%s/%s)\n" $$((100 * $(IDX_$@) / $(STEPS))) $< $(IDX_$@) $(STEPS)
+<T>@$(CC) $(CFLAGS) -MMD -MP -c $< -o $@
 
 $(OBJ_DIR):
-	@echo "[info] Creating object directory '$(OBJ_DIR)'"
-	@mkdir -p $@
+<T>@echo "[info] Creating object directory '$(OBJ_DIR)'"
+<T>@mkdir -p $@
 
 clean:
-	@echo "[clean] Removing '$(OBJ_DIR)/' and '$(TARGET)'"
-	@rm -rf $(OBJ_DIR) $(TARGET)
+<T>@echo "[clean] Removing '$(OBJ_DIR)/' and '$(TARGET)'"
+<T>@rm -rf $(OBJ_DIR) $(TARGET)
 
 help:
-	@echo "Usage: make [target]"
-	@echo ""
-	@echo "Targets:"
-	@echo "  all      Default target. Runs 'build' and prints a summary of what was linked"
-	@echo "  build    Compiles every src/*.c into obj/*.o and links them into '$(TARGET)'"
-	@echo "  clean    Removes the '$(OBJ_DIR)/' directory and the '$(TARGET)' binary"
-	@echo "  help     Shows this message"
-	@echo ""
-	@echo "Internal targets (run automatically):"
-	@echo "  $(TARGET)       Links all object files into the final executable"
-	@echo "  $(OBJ_DIR)/%.o  Compiles a single source file into an object file"
-	@echo "  $(OBJ_DIR)      Creates the object directory"
+<T>@echo "Usage: make [target]"
+<T>@echo ""
+<T>@echo "Targets:"
+<T>@echo "  all      Default target. Runs 'build' and prints a summary of what was linked"
+<T>@echo "  build    Compiles every src/*.c into obj/*.o and links them into '$(TARGET)'"
+<T>@echo "  clean    Removes the '$(OBJ_DIR)/' directory and the '$(TARGET)' binary"
+<T>@echo "  help     Shows this message"
+<T>@echo ""
+<T>@echo "Internal targets (run automatically):"
+<T>@echo "  $(TARGET)       Links all object files into the final executable"
+<T>@echo "  $(OBJ_DIR)/%.o  Compiles a single source file into an object file"
+<T>@echo "  $(OBJ_DIR)      Creates the object directory"
 
 -include $(DEPS)
 
