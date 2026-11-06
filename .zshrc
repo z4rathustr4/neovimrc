@@ -283,7 +283,7 @@ alias e='/opt/nvim/nvim'
 alias rcp='rsync -a --progress --stats '
 alias fd='fdfind'
 alias gits='git status'
-alias commit='git commit -a'
+alias commit='git commit -S -a'
 
 
 # enable auto-suggestions based on the history
@@ -385,14 +385,12 @@ export PATH="$PATH:/opt/nvim-linux-x86_64/bin"
 export EDITOR=/opt/nvim/nvim
 
 # Golang
-export GOPATH=$HOME/go
-export PATH=$PATH:$GOROOT/bin:$GOPATH/bin
+#export GOPATH=$HOME/go
+#export PATH=$PATH:$GOROOT/bin:$GOPATH/bin
 
 # Rust
 . "$HOME/.cargo/env"
 
-
-export PATH=/usr/lib/cargo/bin/coreutils:$PATH
 
 if [ -d "/opt/platform-tools" ] ; then
 	export PATH="/opt/platform-tools:$PATH"
@@ -402,5 +400,3 @@ fpath=(~/.zsh.d/ $fpath)
 
 export SSH_AUTH_SOCK=$(gpgconf --list-dirs agent-ssh-socket)
 
-# opencode
-export PATH=/home/n3uroh4lt/.opencode/bin:$PATH
