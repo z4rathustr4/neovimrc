@@ -382,7 +382,9 @@ fi
 source /usr/share/fzf/key-bindings.zsh
 source /usr/share/fzf/completion.zsh
 export PATH="$PATH:/opt/nvim-linux-x86_64/bin"
+export PATH="$PATH:$HOME/.local/bin"
 export EDITOR=/opt/nvim/nvim
+export GPG_TTY=$(tty)
 
 # Golang
 #export GOPATH=$HOME/go

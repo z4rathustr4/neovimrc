@@ -29,11 +29,33 @@ return {
 				"lua_ls",
 				"rust_analyzer",
 				"pylsp",
+				"clangd@21.1.0", -- mason ships 23.1.0, that's some bullshit
 			},
 			handlers = {
 				function(server_name)
 					require("lspconfig")[server_name].setup({
 						capabilities = capabilities,
+					})
+				end,
+
+				["clangd"] = function()
+					-- defaults, we go on with them
+					local clangd_capabilities = vim.tbl_deep_extend("force", {}, capabilities, {
+						textDocument = {
+							completion = { editsNearCursor = true },
+						},
+						offsetEncoding = { "utf-8", "utf-16" },
+					})
+
+					require("lspconfig").clangd.setup({
+						capabilities = clangd_capabilities,
+						cmd = { "clangd" },
+						filetypes = { "c", "cpp", "objc", "objcpp", "cuda" },
+						on_init = function(client, init_result)
+							if init_result.offsetEncoding then
+								client.offset_encoding = init_result.offsetEncoding
+							end
+						end,
 					})
 				end,
 

@@ -11,7 +11,7 @@ local modules = {
 	require("z4rathustr4.plugins.toggleterm"),
 	require("z4rathustr4.plugins.dap"),
 	require("z4rathustr4.plugins.hover"),
-	require("z4rathustr4.plugins.catppuccin"),
+	require("z4rathustr4.plugins.rose-pine"),
 	require("z4rathustr4.plugins.dashboard"),
 	require("z4rathustr4.plugins.misc"),
 	require("z4rathustr4.plugins.compilation-mode"),
