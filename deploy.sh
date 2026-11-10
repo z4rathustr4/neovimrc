@@ -117,7 +117,7 @@ install_nvim() {
     asset="nvim-linux-$arch.appimage"
 
     echo "[*] Downloading latest Neovim AppImage ($asset)..."
-    curl -fL "https://github.com/neovim/neovim/releases/latest/download/nightly/$asset" \
+    curl -fL "https://github.com/neovim/neovim/releases/latest/download/$asset" \
         -o "$tmp_dir/nvim" || {
         echo "[E] Failed to download Neovim."
         return 1
